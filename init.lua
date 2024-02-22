@@ -589,8 +589,7 @@ require('mason-lspconfig').setup()
 local servers = {
   gopls = {},
   clangd = {},
-  docker_compose_language_server = {},
-  dockerls = {},
+  -- dockerls = {},
   -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
