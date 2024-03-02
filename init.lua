@@ -85,6 +85,7 @@ require('lazy').setup({
       -- Automatically install LSPs to stdpath for neovim
       { 'williamboman/mason.nvim', config = true },
       'williamboman/mason-lspconfig.nvim',
+      'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -434,6 +435,32 @@ vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by 
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
 
+vim.keymap.set('n', '<leader>gi', ':w<CR>:silent !goimports -w %<CR>:e!<CR>', { desc = 'Format Go code with goimports' })
+vim.cmd [[
+function! GenerateTestsForCurrentFunction()
+  let l:func_name = expand('<cword>')
+  let l:command = 'silent !gotests -w -only ' . l:func_name . ' %'
+  execute ':w'
+  execute l:command
+  execute ':e!'
+endfunction
+]]
+vim.cmd [[
+function! RunCurrentGoTest()
+  let l:func_name = expand('<cword>')
+  if l:func_name =~ '^Test'
+    let l:relative_path = expand('%:h')
+    let l:command = ':! cd ' . l:relative_path . ' && go test -run '  . l:func_name
+    execute l:command
+  else
+    echo "No test name found under cursor."
+  endif
+endfunction
+]]
+vim.keymap.set('n', '<leader>gt', ':call GenerateTestsForCurrentFunction()<CR>',
+  { desc = 'Generate [t]ests for the function' })
+vim.keymap.set('n', '<leader>gr', ':call RunCurrentGoTest()<CR>',
+  { desc = '[R]un current go test' })
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 -- Defer Treesitter setup after first render to improve startup time of 'nvim {filename}'
@@ -577,6 +604,15 @@ require('which-key').register({
 -- before setting up the servers.
 require('mason').setup()
 require('mason-lspconfig').setup()
+require('mason-tool-installer').setup {
+  ensure_installed = {
+    "goimports",
+    "gotests",
+    -- Add other tools you want to install here
+  },
+  auto_update = false, -- Set to true if you want to automatically update the tools
+  run_on_start = true, -- Set to true if you want to install missing tools on start
+}
 
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -681,6 +717,9 @@ cmp.setup {
     { name = 'path' },
   },
 }
+
+vim.opt.guicursor = "i:ver100-CursorColor,a:blinkon1"
+vim.cmd([[highlight CursorColor guifg=white guibg=red]])
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
