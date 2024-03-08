@@ -270,7 +270,11 @@ require('lazy').setup({
     },
     build = ':TSUpdate',
   },
-
+  { 'akinsho/toggleterm.nvim', version = "*", config = true },
+  {
+    "nvim-telescope/telescope-file-browser.nvim",
+    dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" }
+  },
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -370,6 +374,7 @@ require('telescope').setup {
 
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
+require("telescope").load_extension "file_browser"
 
 -- Telescope live_grep in git root
 -- Function to find the git root directory based on the current buffer's path
@@ -434,6 +439,7 @@ vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc
 vim.keymap.set('n', '<leader>sG', ':LiveGrepGitRoot<cr>', { desc = '[S]earch by [G]rep on Git Root' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = '[S]earch [R]esume' })
+vim.keymap.set('n', '<leader>sd', ':Telescope file_browser<CR>', { desc = '[S]earch [D]irectories' })
 
 vim.keymap.set('n', '<leader>gi', ':w<CR>:silent !goimports -w %<CR>:e!<CR>', { desc = 'Format Go code with goimports' })
 vim.cmd [[
@@ -720,6 +726,34 @@ cmp.setup {
 
 vim.opt.guicursor = "i:ver100-CursorColor,a:blinkon1"
 vim.cmd([[highlight CursorColor guifg=white guibg=red]])
+
+local status_ok, toggleterm = pcall(require, "toggleterm")
+if not status_ok then
+  return
+end
+
+toggleterm.setup({
+  size = 20,
+  open_mapping = [[<c-\>]],
+  hide_numbers = true,
+  shade_filetypes = {},
+  shade_terminals = true,
+  shading_factor = 2,
+  start_in_insert = true,
+  insert_mappings = true,
+  persist_size = true,
+  direction = "float",
+  close_on_exit = true,
+  shell = vim.o.shell,
+  float_opts = {
+    border = "curved",
+    winblend = 0,
+    highlights = {
+      border = "Normal",
+      background = "Normal",
+    },
+  },
+})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
