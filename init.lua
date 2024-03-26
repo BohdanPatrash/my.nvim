@@ -363,6 +363,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
 require('telescope').setup {
   pickers = { find_files = { hidden = true } },
   defaults = {
+    file_ignore_patterns = { ".git/" },
     mappings = {
       i = {
         ['<C-u>'] = false,
